@@ -3,30 +3,44 @@ package presentation
 import (
 	"fmt"
 	"himaplus-api/application"
+	// "himaplus-api/common/custom"
+	"himaplus-api/common/responder"
+	"himaplus-api/dto/requests"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type ToDoHandler struct {
-	s *application.ToDoService
+type TodoHandler struct {
+	s *application.TodoService
 }
 
 // ファクトリー関数
-func NewToDoHandler(s *application.ToDoService) *ToDoHandler {
-	return &ToDoHandler{
+func NewTodoHandler(s *application.TodoService) *TodoHandler {
+	return &TodoHandler{
 		s: s,
 	}
 }
 
-// todo登録
-func (h *ToDoHandler) RegisterToDoHandler(ctx *gin.Context) {
+// Todo登録
+func (h *TodoHandler) RegisterTodoHandler(ctx *gin.Context) {
 
-	fmt.Println("todoはんどらーです")
-		// 構造体にマッピング
-		// var bToDo requests.ToDo // 構造体のインスタンス
-		// if err := ctx.ShouldBindJSON(&bReq); err != nil {
-		// 	responder.SendFailedBindJSON(ctx, err)
-		// 	return
-		// }
+	fmt.Println("Todoはんどらーです")
 
+	// 構造体にマッピング
+	var bTodo requests.RegisterTodo // 構造体のインスタンス
+	if err := ctx.ShouldBindJSON(&bTodo); err != nil {
+		fmt.Println("Binding failed:", err)
+		responder.SendFailedBindJSON(ctx, err)
+		return
+	}
+
+	// サービス処理
+	ids, err := h.s.RegisterTodoService([]requests.RegisterTodo{bTodo})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// 成功レスポンス
+	responder.SendSuccess(ctx, http.StatusCreated, ids)
 }

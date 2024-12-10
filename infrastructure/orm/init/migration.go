@@ -12,7 +12,7 @@ import (
 // マイグレーションするテーブル一覧を追加していく
 func tableModels() []interface{} {
 	return []interface{}{
-		new(model.ToDo),
+		new(model.Todo),
 	}
 }
 
@@ -35,7 +35,7 @@ func initFK(db *xorm.Engine, models []interface{}) error { // テーブルモデ
 // マイグレーション関連
 func MigrationTable(db *xorm.Engine) error {
 	// テーブルがないなら自動で作成 // xormがテーブル作成時に列名をスネークケースにしてくれる  // 列情報の追加変更は反映するが列の削除は反映しない
-	if exists, _ := db.IsTableExist(&model.ToDo{}); !exists { // この判定で、外部キー設定済みのテーブルの再Sync2時に外部キーのインデックスを消せないエラーを防いでいる
+	if exists, _ := db.IsTableExist(&model.Todo{}); !exists { // この判定で、外部キー設定済みのテーブルの再Sync2時に外部キーのインデックスを消せないエラーを防いでいる
 		// マイグレーションするテーブル一覧を取得
 		tableModels := tableModels()
 
@@ -57,9 +57,6 @@ func MigrationTable(db *xorm.Engine) error {
 			return err
 		}
 	}
-
-	// サンプルデータ作成
-	RegisterSample(db)
 
 	return nil
 }
