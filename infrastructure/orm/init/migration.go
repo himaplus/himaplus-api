@@ -3,8 +3,10 @@
 package orm
 
 import (
+	"fmt"
 	"himaplus-api/common/logging"
 	"himaplus-api/infrastructure/orm/model"
+	"log"
 
 	"xorm.io/xorm"
 )
@@ -13,6 +15,7 @@ import (
 func tableModels() []interface{} {
 	return []interface{}{
 		new(model.Todo),
+		new(model.TodoGroup),
 	}
 }
 
@@ -41,7 +44,8 @@ func MigrationTable(db *xorm.Engine) error {
 
 		// テーブルの登録
 		err := db.Sync2( // ここにテーブルを追加
-			tableModels..., // ...でスライスを展開して可変長引数として渡す
+			// tableModels..., // ...でスライスを展開して可変長引数として渡す
+			new(model.Todo),
 		)
 		if err != nil {
 			logging.ErrorLog("Failed to sync database.", err)
@@ -56,7 +60,30 @@ func MigrationTable(db *xorm.Engine) error {
 			logging.ErrorLog("Failed to set foreign key.", err)
 			return err
 		}
+
+		fmt.Println("テストデータの登録")
+		RegisterSample(db)
 	}
 
 	return nil
+}
+
+// RegisterSample関数でサンプルデータを一括登録
+func RegisterSample(db *xorm.Engine) {
+	// 挿入処理を無名関数で定義
+	insertSamples := func(samples ...interface{}) {
+		for _, sample := range samples {
+			logging.SimpleLog("動いてるからinsert死んでる")
+			if _, err := db.Insert(sample); err != nil {
+				log.Fatalf("サンプルデータの挿入に失敗しました: %v", err)
+			}
+		}
+		log.Println("すべてのサンプルデータの挿入が成功しました")
+	}
+
+	// サンプルデータを一括登録
+	insertSamples(
+		model.CreateTodoTestData(), // Todoのサンプルデータ
+		// model.CreateHogeTestData(), // 他のテーブルのサンプルデータを追加する場合
+	)
 }
