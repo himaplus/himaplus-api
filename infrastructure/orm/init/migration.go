@@ -46,6 +46,7 @@ func MigrationTable(db *xorm.Engine) error {
 		err := db.Sync2( // ここにテーブルを追加
 			// tableModels..., // ...でスライスを展開して可変長引数として渡す
 			new(model.Todo),
+			new(model.TodoGroup),
 		)
 		if err != nil {
 			logging.ErrorLog("Failed to sync database.", err)
@@ -73,7 +74,6 @@ func RegisterSample(db *xorm.Engine) {
 	// 挿入処理を無名関数で定義
 	insertSamples := func(samples ...interface{}) {
 		for _, sample := range samples {
-			logging.SimpleLog("動いてるからinsert死んでる")
 			if _, err := db.Insert(sample); err != nil {
 				log.Fatalf("サンプルデータの挿入に失敗しました: %v", err)
 			}
@@ -83,7 +83,10 @@ func RegisterSample(db *xorm.Engine) {
 
 	// サンプルデータを一括登録
 	insertSamples(
+		model.CreateTodoGroupTestData(),
 		model.CreateTodoTestData(), // Todoのサンプルデータ
 		// model.CreateHogeTestData(), // 他のテーブルのサンプルデータを追加する場合
 	)
 }
+
+
