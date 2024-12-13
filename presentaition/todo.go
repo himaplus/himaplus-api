@@ -27,7 +27,7 @@ func (h *TodoHandler) RegisterTodoHandler(ctx *gin.Context) {
 	fmt.Println("Todoはんどらーです")
 
 	// 構造体にマッピング
-	var bTodo requests.RegisterTodo // 構造体のインスタンス
+	var bTodo []requests.RegisterTodo // 構造体のインスタンス
 	if err := ctx.ShouldBindJSON(&bTodo); err != nil {
 		fmt.Println("Binding failed:", err)
 		responder.SendFailedBindJSON(ctx, err)
@@ -35,7 +35,7 @@ func (h *TodoHandler) RegisterTodoHandler(ctx *gin.Context) {
 	}
 
 	// サービス処理
-	ids, err := h.s.RegisterTodoService([]requests.RegisterTodo{bTodo})
+	ids, err := h.s.RegisterTodoService(bTodo)
 	if err != nil {
 		fmt.Println(err)
 	}
