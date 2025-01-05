@@ -2,9 +2,12 @@ package application
 
 import (
 	"fmt"
+	"himaplus-api/common/custom"
+	"himaplus-api/common/logging"
 	"himaplus-api/dto/requests"
 	"himaplus-api/infrastructure/orm"
 	"himaplus-api/infrastructure/orm/model"
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,7 +39,7 @@ func (s *TodoService) RegisterTodoService(req []requests.RegisterTodo) ([]TodoIn
 
 	// 結果格納用
 	var todoInfos []TodoInfo
-	
+
 	// 複数登録するときのために
 	for _, todo := range req {
 
@@ -110,8 +113,97 @@ func (s *TodoService) RegisterTodoService(req []requests.RegisterTodo) ([]TodoIn
 			todoInfos = append(todoInfos, todoInfo)
 		}
 
-
 	}
 
 	return todoInfos, nil
+}
+
+// todo一覧取得の際のテーブル
+type FindAllTodo struct {
+	TodoHostUuid string `json:"todoUUID"`  // 親要素か単体todoのUUID
+	Title        string `json:"title"`     // タイトル
+	Priority     int    `json:"priority"`  // 重要度
+	GroupHost    bool   `json:"groupHost"` // GroupHostなのかを保持
+}
+
+// todo一覧取得
+func (s *TodoService) FindAllTodoService(userUuid string) ([]FindAllTodo, error) {
+
+	// 取得してきた値を格納する用のスライス
+	var FindAllTodos []FindAllTodo
+
+	// TODO:grouphostと単体todoをまとめて撮ってくるには私の精神が持たないので分けます
+	// TodoGroupに登録されているのを取得してくる
+	todoGroups, err := s.i.FindAllTodoGroup(userUuid)
+	if err != nil {
+		return []FindAllTodo{}, err
+	}
+
+	// 整形して必要な値を取り出していくために取ってきた分だけ繰り返す
+	for _, todoGroup := range todoGroups {
+
+		// 整形して必要な値を取り出す
+		FindAllTodo := FindAllTodo{
+			TodoHostUuid: todoGroup.TodoGroupUuid,
+			Title:        todoGroup.Title,
+			Priority:     todoGroup.Priority,
+			GroupHost:    true,
+		}
+
+		// スライスに追加していく
+		FindAllTodos = append(FindAllTodos, FindAllTodo)
+	}
+
+	// 単体todoを取得してくる
+	singleTodos, err := s.i.FindAllSingleTodo(userUuid)
+	// 整形して必要な値を取り出していくために取ってきた分だけ繰り返す
+	for _, singleTodo := range singleTodos {
+
+		// 整形して必要な値を取り出す
+		FindAllTodo := FindAllTodo{
+			TodoHostUuid: singleTodo.TodoUuid,
+			Title:        singleTodo.Title,
+			Priority:     singleTodo.Priority,
+			GroupHost:    false,
+		}
+
+		// スライスに追加していく
+		FindAllTodos = append(FindAllTodos, FindAllTodo)
+	}
+
+	// 重要度の高い順に並び替える
+	sort.Slice(FindAllTodos, func(i, j int) bool {
+		return FindAllTodos[i].Priority < FindAllTodos[j].Priority
+	})
+
+	return FindAllTodos, err
+}
+
+// todoGroup取得
+func (s *TodoService) FindTodoGroupService(userUuid string, todoGroupUuid string) ([]model.Todo, error) {
+
+	// todoGroupが存在しているのか判断する
+	isGroup, err := s.i.IsTodoGroup(userUuid, todoGroupUuid)
+	if err != nil {
+		return []model.Todo{}, err
+	}
+	if !isGroup { // なかったらエラー
+		logging.ErrorLog("Do not have the necessary permissions", nil)
+		return nil, custom.NewErr(custom.ErrTypePermissionDenied)
+	}
+
+	// 取得してきたgroupに関するtodoを全取得
+	todoGroup, err := s.i.GetTodoByTodoGroup(userUuid, todoGroupUuid)
+	if err != nil {
+		return []model.Todo{}, err
+	}
+
+	fmt.Println(todoGroup)
+
+	// 重要度の高い順に並び替える
+	sort.Slice(todoGroup, func(i, j int) bool {
+		return todoGroup[i].Priority < todoGroup[j].Priority
+	})
+
+	return todoGroup, err
 }

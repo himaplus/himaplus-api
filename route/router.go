@@ -28,7 +28,13 @@ func routing(engine *gin.Engine, handlers Handlers) {
 		todos := v1.Group("/todos")
 		{
 			// todo新規登録
-			todos.POST("/register", handlers.TodoHandler.RegisterTodoHandler) //
+			todos.POST("/register", handlers.TodoHandler.RegisterTodoHandler) //  v1/todos/register
+
+			// todo取得
+			todos.GET("/todos", handlers.TodoHandler.GetAllTodoHandler)	// v1/todos
+
+			// todoGroup取得 TODO:
+			todos.GET("/todo_groups/:todo_group_uuid", handlers.TodoHandler.GetTodoGroupHandler) // v1/todos/todo_groups/{todo_group_uuid}
 		}
 	}
 }

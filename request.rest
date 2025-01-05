@@ -1,6 +1,7 @@
 @base_url = http://localhost:4561
 @api_v = /v1
 @boundary = ----MyBoundary
+@todo_group_uuid = 7ec51405-03f4-47f6-a69e-8e52395d796b
 
 ### テスト
 GET {{base_url}}/check/echo HTTP/1.1
@@ -32,5 +33,11 @@ Content-Type: application/json
   "requiredTime": 600000000000,
   "memo": "じゃがいも忘れたら人生詰み"
 }]
+
+### todo取得(単体と親要素)
+GET {{base_url}}{{api_v}}/todos/todos HTTP/1.1
+
+### todoGroup取得
+GET {{base_url}}{{api_v}}/todos/todo_groups/{{todo_group_uuid}} HTTP/1.1
 
 
