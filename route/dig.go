@@ -23,10 +23,10 @@ import (
 // 依存関係を登録したいファクトリー関数を追加していく
 func providers() []interface{} {
 	return []interface{}{
-		// todoドメイン？
-		infrastructure.NewToDoInfrastruture,
-		application.NewToDoService,
-		presentation.NewToDoHandler,
+		// Todoドメイン？
+		infrastructure.NewTodoInfrastruture,
+		application.NewTodoService,
+		presentation.NewTodoHandler,
 	}
 }
 
@@ -36,7 +36,7 @@ type Handlers struct {
 	dig.In // 継承
 
 	// ハンドラーの構造体
-	ToDoHandler *presentation.ToDoHandler // TODO
+	TodoHandler *presentation.TodoHandler // Todo
 }
 
 // 依存関係を作成

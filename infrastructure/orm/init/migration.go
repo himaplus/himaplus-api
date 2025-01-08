@@ -3,8 +3,10 @@
 package orm
 
 import (
+	"fmt"
 	"himaplus-api/common/logging"
 	"himaplus-api/infrastructure/orm/model"
+	"log"
 
 	"xorm.io/xorm"
 )
@@ -12,7 +14,8 @@ import (
 // マイグレーションするテーブル一覧を追加していく
 func tableModels() []interface{} {
 	return []interface{}{
-		new(model.ToDo),
+		new(model.Todo),
+		new(model.TodoGroup),
 	}
 }
 
@@ -35,13 +38,15 @@ func initFK(db *xorm.Engine, models []interface{}) error { // テーブルモデ
 // マイグレーション関連
 func MigrationTable(db *xorm.Engine) error {
 	// テーブルがないなら自動で作成 // xormがテーブル作成時に列名をスネークケースにしてくれる  // 列情報の追加変更は反映するが列の削除は反映しない
-	if exists, _ := db.IsTableExist(&model.ToDo{}); !exists { // この判定で、外部キー設定済みのテーブルの再Sync2時に外部キーのインデックスを消せないエラーを防いでいる
+	if exists, _ := db.IsTableExist(&model.Todo{}); !exists { // この判定で、外部キー設定済みのテーブルの再Sync2時に外部キーのインデックスを消せないエラーを防いでいる
 		// マイグレーションするテーブル一覧を取得
 		tableModels := tableModels()
 
 		// テーブルの登録
 		err := db.Sync2( // ここにテーブルを追加
-			tableModels..., // ...でスライスを展開して可変長引数として渡す
+			// tableModels..., // ...でスライスを展開して可変長引数として渡す
+			new(model.Todo),
+			new(model.TodoGroup),
 		)
 		if err != nil {
 			logging.ErrorLog("Failed to sync database.", err)
@@ -56,10 +61,32 @@ func MigrationTable(db *xorm.Engine) error {
 			logging.ErrorLog("Failed to set foreign key.", err)
 			return err
 		}
-	}
 
-	// サンプルデータ作成
-	RegisterSample(db)
+		fmt.Println("テストデータの登録")
+		RegisterSample(db)
+	}
 
 	return nil
 }
+
+// RegisterSample関数でサンプルデータを一括登録
+func RegisterSample(db *xorm.Engine) {
+	// 挿入処理を無名関数で定義
+	insertSamples := func(samples ...interface{}) {
+		for _, sample := range samples {
+			if _, err := db.Insert(sample); err != nil {
+				log.Fatalf("サンプルデータの挿入に失敗しました: %v", err)
+			}
+		}
+		log.Println("すべてのサンプルデータの挿入が成功しました")
+	}
+
+	// サンプルデータを一括登録
+	insertSamples(
+		model.CreateTodoGroupTestData(),
+		model.CreateTodoTestData(), // Todoのサンプルデータ
+		// model.CreateHogeTestData(), // 他のテーブルのサンプルデータを追加する場合
+	)
+}
+
+

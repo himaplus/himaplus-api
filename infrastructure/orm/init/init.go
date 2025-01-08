@@ -43,6 +43,7 @@ func InitDB() (*xorm.Engine, error) {
 		return nil, err
 	}
 
+	fmt.Println("テーブル作成")
 	// テーブル作成
 	err = MigrationTable(db)
 	if err != nil {
