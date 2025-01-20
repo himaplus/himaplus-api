@@ -2,6 +2,7 @@
 @api_v = /v1
 @boundary = ----MyBoundary
 @todo_group_uuid = 7ec51405-03f4-47f6-a69e-8e52395d796b
+@todo_uuid = 97c2e621-4067-480b-90ed-2ad69af04b8b
 
 ### テスト
 GET {{base_url}}/check/echo HTTP/1.1
@@ -28,14 +29,17 @@ Content-Type: application/json
 
 [{
   "userUUID": "eefbacae-28b2-4e32-91be-f6c08573e6b9",
-  "Titel": "買い出し",
+  "title": "買い出し",
   "priority": 3,
   "requiredTime": 600000000000,
   "memo": "じゃがいも忘れたら人生詰み"
 }]
 
-### todo取得(単体と親要素)
+### todo一覧取得(単体と親要素)
 GET {{base_url}}{{api_v}}/todos/todos HTTP/1.1
+
+### todo詳細取得
+GET {{base_url}}{{api_v}}/todos/{{todo_uuid}} HTTP/1.1
 
 ### todoGroup取得
 GET {{base_url}}{{api_v}}/todos/todo_groups/{{todo_group_uuid}} HTTP/1.1
