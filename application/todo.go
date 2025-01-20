@@ -35,7 +35,7 @@ func (s *TodoService) RegisterTodoService(req []requests.RegisterTodo) ([]TodoIn
 
 	// 他のtodo登録で必要なgroupHostの情報を保持する用変数
 	var groupUuid string
-	hostPriority := 0 // TODO:置き換わってるかを判断できるように0入れてるけど、別の方法ありそうだったから変える
+	hostPriority := 0 // TODO:置き換わってるかを判断できるように0入れてるけど、別の方法ありそうだったら変える
 
 	// 結果格納用
 	var todoInfos []TodoInfo
@@ -43,8 +43,8 @@ func (s *TodoService) RegisterTodoService(req []requests.RegisterTodo) ([]TodoIn
 	// 複数登録するときのために
 	for _, todo := range req {
 
-		fmt.Println(todo) // 情報確認
-
+		fmt.Printf("todo: %+v\n", todo) // フィールド内容をすべて確認
+		
 		if todo.GroupHost {
 			// uuidを生成
 			hostId, err := uuid.NewRandom() //新しいuuidの作成
@@ -112,7 +112,6 @@ func (s *TodoService) RegisterTodoService(req []requests.RegisterTodo) ([]TodoIn
 			// 情報格納
 			todoInfos = append(todoInfos, todoInfo)
 		}
-
 	}
 
 	return todoInfos, nil
@@ -187,7 +186,7 @@ func (s *TodoService) FindTodoGroupService(userUuid string, todoGroupUuid string
 	if err != nil {
 		return []model.Todo{}, err
 	}
-	if !isGroup { // なかったらエラー
+	if !isGroup { // なかったらエラー TODO:グループなかったときのエラーって権限なし？
 		logging.ErrorLog("Do not have the necessary permissions", nil)
 		return nil, custom.NewErr(custom.ErrTypePermissionDenied)
 	}
@@ -206,4 +205,24 @@ func (s *TodoService) FindTodoGroupService(userUuid string, todoGroupUuid string
 	})
 
 	return todoGroup, err
+}
+
+// todo詳細取得
+func (s *TodoService) GetTodoDetailaService(userUuid string, todoUuid string) (model.Todo, error) {
+
+	// todo取得
+	todoDetail, err := s.i.GetTodoDetail(userUuid, todoUuid)
+	if err != nil {
+		return model.Todo{}, err
+	}
+
+	// 取得できてるか確認　なかったらエラー
+	if todoDetail == nil { // 取得できなかった
+		fmt.Println("todoDetail is nil")
+		return model.Todo{}, custom.NewErr(custom.ErrTypeNoResourceExist)
+	}
+
+	fmt.Println(todoDetail)
+
+	return *todoDetail, err
 }
