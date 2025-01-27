@@ -44,7 +44,6 @@ func (s *TodoService) RegisterTodoService(req []requests.RegisterTodo) ([]TodoIn
 	for _, todo := range req {
 
 		fmt.Printf("todo: %+v\n", todo) // フィールド内容をすべて確認
-		
 		if todo.GroupHost {
 			// uuidを生成
 			hostId, err := uuid.NewRandom() //新しいuuidの作成
@@ -89,8 +88,8 @@ func (s *TodoService) RegisterTodoService(req []requests.RegisterTodo) ([]TodoIn
 				hostPriority = todo.Priority
 			}
 
-			// 構造体をレコード登録処理に投げる
-			_, err = s.i.CreateTodo(model.Todo{
+			// 登録する構造体の宣言
+			bTodo := model.Todo{
 				UserUuid:      todo.UserUUID,
 				TodoUuid:      uuid.String(),
 				Title:         todo.Titel,
@@ -98,8 +97,16 @@ func (s *TodoService) RegisterTodoService(req []requests.RegisterTodo) ([]TodoIn
 				RequiredTime:  todo.RequiredTime,
 				Memo:          todo.Memo,
 				Date:          time.Now(),
-				TodoGroupUuid: &groupUuid,
-			})
+			}
+
+			// hostがあった場合、todoGroupUuidが保持されるため単体登録の時、登録されないので
+			// groupUuidに値が入っているときにその項目を増やすようにしました
+			if groupUuid != "" {
+				bTodo.TodoGroupUuid = &groupUuid
+			}
+
+			// 構造体をレコード登録処理に投げる
+			_, err = s.i.CreateTodo(bTodo)
 			if err != nil {
 				return []TodoInfo{}, err
 			}
@@ -109,6 +116,7 @@ func (s *TodoService) RegisterTodoService(req []requests.RegisterTodo) ([]TodoIn
 				TodoUuid: uuid.String(),
 				Title:    todo.Titel,
 			}
+
 			// 情報格納
 			todoInfos = append(todoInfos, todoInfo)
 		}
@@ -182,11 +190,11 @@ func (s *TodoService) FindAllTodoService(userUuid string) ([]FindAllTodo, error)
 func (s *TodoService) FindTodoGroupService(userUuid string, todoGroupUuid string) ([]model.Todo, error) {
 
 	// todoGroupが存在しているのか判断する
-	isGroup, err := s.i.IsTodoGroup(userUuid, todoGroupUuid)
+	isTodoGroup, err := s.i.IsTodoGroup(userUuid, todoGroupUuid)
 	if err != nil {
 		return []model.Todo{}, err
 	}
-	if !isGroup { // なかったらエラー TODO:グループなかったときのエラーって権限なし？
+	if !isTodoGroup { // なかったらエラー TODO:グループなかったときのエラーって権限なし？
 		logging.ErrorLog("Do not have the necessary permissions", nil)
 		return nil, custom.NewErr(custom.ErrTypePermissionDenied)
 	}
