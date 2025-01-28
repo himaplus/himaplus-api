@@ -11,6 +11,8 @@ import (
 // エンドポイントのルーティング
 func routing(engine *gin.Engine, handlers Handlers) {
 	// MidLog all
+
+	// logging
 	engine.Use(middleware.LoggingMid())
 
 	// endpoints
