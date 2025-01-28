@@ -10,6 +10,13 @@ import (
 
 // エンドポイントのルーティング
 func routing(engine *gin.Engine, handlers Handlers) {
+	// MidLog all
+	engine.Use(middleware.LoggingMid())
+
+	// endpoints
+
+	// root page
+	engine.GET("/", presentation.ShowRootPage) // /
 
 	// checkグループ
 	check := engine.Group("/check")
