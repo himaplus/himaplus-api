@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"himaplus-api/common/custom"
 	"himaplus-api/common/logging"
-	"himaplus-api/dto/requests"
+	"himaplus-api/dto/clireq"
 	"himaplus-api/infrastructure/orm"
 	"himaplus-api/infrastructure/orm/model"
 	"sort"
@@ -31,7 +31,7 @@ type TodoInfo struct { // typeで型の定義, structは構造体
 }
 
 // Todo新規登録
-func (s *TodoService) RegisterTodoService(req []requests.RegisterTodo) ([]TodoInfo, error) {
+func (s *TodoService) RegisterTodoService(req []clireq.RegisterTodo) ([]TodoInfo, error) {
 
 	// 他のtodo登録で必要なgroupHostの情報を保持する用変数
 	var groupUuid string
