@@ -1,7 +1,8 @@
 package route
 
 import (
-	"himaplus-api/presentaition"
+	"himaplus-api/middleware"
+	presentation "himaplus-api/presentaition"
 	"himaplus-api/view"
 
 	"github.com/gin-gonic/gin"
@@ -18,11 +19,30 @@ func routing(engine *gin.Engine, handlers Handlers) {
 
 		// sandbox
 		check.GET("/sandbox", presentation.Try) // /check/sandbox
+
+		// 認証ミドルウェア
+		check.GET("/auth", middleware.AuthToken(), presentation.Auth) // /check/auth
 	}
 
 	// ver1グループ
 	v1 := engine.Group("/v1")
 	{
+		// authグループ
+		auth := v1.Group("/auth", middleware.AuthToken())
+		{
+			// todosグループ
+			todos := auth.Group("/todos")
+			{
+				// todo新規登録
+				todos.POST("/register", handlers.TodoHandler.RegisterTodoHandler) //  v1/todos/register
+
+				// todo取得
+				todos.GET("/todos", handlers.TodoHandler.GetAllTodoHandler) // v1/todos
+
+				// todoGroup取得 TODO:
+				todos.GET("/todo_groups/:todo_group_uuid", handlers.TodoHandler.GetTodoGroupHandler) // v1/todos/todo_groups/{todo_group_uuid}
+			}
+		}
 
 		// todosグループ
 		todos := v1.Group("/todos")
@@ -31,7 +51,7 @@ func routing(engine *gin.Engine, handlers Handlers) {
 			todos.POST("/register", handlers.TodoHandler.RegisterTodoHandler) //  v1/todos/register
 
 			// todo取得
-			todos.GET("/todos", handlers.TodoHandler.GetAllTodoHandler)	// v1/todos
+			todos.GET("/todos", handlers.TodoHandler.GetAllTodoHandler) // v1/todos
 
 			// todoGroup取得 TODO:
 			todos.GET("/todo_groups/:todo_group_uuid", handlers.TodoHandler.GetTodoGroupHandler) // v1/todos/todo_groups/{todo_group_uuid}
