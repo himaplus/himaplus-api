@@ -7,7 +7,7 @@ import (
 	"himaplus-api/common/custom"
 	"himaplus-api/common/logging"
 	"himaplus-api/common/responder"
-	"himaplus-api/dto/requests"
+	"himaplus-api/dto/clireq"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -27,7 +27,7 @@ func NewTodoHandler(s *application.TodoService) *TodoHandler {
 // Todo登録
 func (h *TodoHandler) RegisterTodoHandler(ctx *gin.Context) {
 	// 構造体にマッピング
-	var bTodo []requests.RegisterTodo // 構造体のインスタンス
+	var bTodo []clireq.RegisterTodo // 構造体のインスタンス
 	if err := ctx.ShouldBindJSON(&bTodo); err != nil {
 		fmt.Println("Binding failed:", err)
 		responder.SendFailedBindJSON(ctx, err)

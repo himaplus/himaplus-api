@@ -3,7 +3,9 @@
 package presentation
 
 import (
+	"encoding/json"
 	"himaplus-api/common/logging"
+	"himaplus-api/dto/extres"
 	"net/http"
 	"time"
 
@@ -95,4 +97,29 @@ func Try(c *gin.Context) {
 	// 		fmt.Println(email + ": " + "ok")
 	// 	}
 	// }
+}
+
+// 認証ミドルウェアを通過できたか
+func Auth(c *gin.Context) {
+	logging.InfoLog("Authentication middleware passage:", "")
+
+	// 認証ミドルウェアで受け取ったものを取得し、
+	token, _ := c.Get("token")      // token
+	tokenAdjusted := token.(string) // アサーション
+	id, _ := c.Get("id")            // id
+	idAdjusted := id.(string)
+	user, _ := c.Get("user") // ユーザー情報
+	userAdjusted := user.(extres.UserInfo)
+	userJsonIndent, _ := json.MarshalIndent(userAdjusted, "", "\t")
+
+	// 表示する
+	logging.InfoLog("token:", tokenAdjusted)
+	logging.InfoLog("id", idAdjusted)
+	logging.InfoLog("userJson", string(userJsonIndent))
+
+	// // jsonの扱い
+	// logging.InfoLog("user", fmt.Sprintf("%v", userAdjusted)) // {value value,,,}
+	// userJson, _ := json.Marshal(userAdjusted)                // インデントなしのJSONを作成
+	// fmt.Println(userJson)                                    // [1 2 3...]
+	// logging.InfoLog("userJson", string(userJson))            // {"key":"value","key",,,}
 }

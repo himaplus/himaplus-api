@@ -1,4 +1,4 @@
-package requests
+package clireq
 
 import (
 	"time"
