@@ -234,7 +234,7 @@ func (s *TodoService) GetTodoDetailaService(userUuid string, todoUuid string) (m
 }
 
 // todo更新
-func (s *TodoService) UpdateTodoService(req requests.RegisterTodo, todoUuid string) (TodoInfo, error) {
+func (s *TodoService) UpdateTodoService(req clireq.RegisterTodo, todoUuid string) (TodoInfo, error) {
 
 	// todoが存在するか reqの中にあるuserUuidを使う
 	todoDetail, err := s.i.GetTodoDetail(req.UserUUID, todoUuid)

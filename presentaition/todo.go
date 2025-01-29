@@ -179,7 +179,7 @@ func (h *TodoHandler) GetTodoDetailHandler(ctx *gin.Context) {
 func (h *TodoHandler) UpdateTodoHandler(ctx *gin.Context) {
 
 	// 構造体にマッピング
-	var bTodo requests.RegisterTodo // 構造体のインスタンス
+	var bTodo clireq.RegisterTodo // 構造体のインスタンス
 	if err := ctx.ShouldBindJSON(&bTodo); err != nil {
 		fmt.Println("Binding failed:", err)
 		responder.SendFailedBindJSON(ctx, err)
