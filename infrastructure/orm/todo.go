@@ -104,3 +104,11 @@ func (i *TodoInfrastruture) GetTodoDetail(userUuid string, todoUuid string) (*mo
 
 	return &todoDateil, nil
 }
+
+// todo更新
+func (i *TodoInfrastruture) UpdateTodo(userUuid string, todoUuid string, record model.Todo) (int64, error) {
+	affected, err := i.db.
+			Where("user_uuid = ? AND todo_uuid = ?", userUuid, todoUuid).
+			Update(&record)
+	return affected, err
+}

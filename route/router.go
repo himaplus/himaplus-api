@@ -31,13 +31,16 @@ func routing(engine *gin.Engine, handlers Handlers) {
 			todos.POST("/register", handlers.TodoHandler.RegisterTodoHandler) //  v1/todos/register
 
 			// todo取得
-			todos.GET("/todos", handlers.TodoHandler.GetAllTodoHandler)	// v1/todos
+			todos.GET("/todos", handlers.TodoHandler.GetAllTodoHandler) // v1/todos
 
 			// todo詳細取得
-			todos.GET("/:todo_uuid", handlers.TodoHandler.GetTodoDetailHandler)	// va/todos/{todo_uuid}
+			todos.GET("/:todo_uuid", handlers.TodoHandler.GetTodoDetailHandler) // va/todos/{todo_uuid}
 
-			// todoGroup取得 TODO:
+			// todoGroup取得
 			todos.GET("/todo_groups/:todo_group_uuid", handlers.TodoHandler.GetTodoGroupHandler) // v1/todos/todo_groups/{todo_group_uuid}
+
+			// todo更新
+			todos.PUT("/update/:todo_uuid", handlers.TodoHandler.UpdateTodoHandler) // v1/todos/update/{todo_uuid}
 		}
 	}
 }

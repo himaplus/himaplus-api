@@ -2,7 +2,7 @@
 @api_v = /v1
 @boundary = ----MyBoundary
 @todo_group_uuid = 7ec51405-03f4-47f6-a69e-8e52395d796b
-@todo_uuid = 97c2e621-4067-480b-90ed-2ad69af04b8b
+@todo_uuid =  db2d30de-127e-47cf-aa26-772398e004f4 
 
 ### テスト
 GET {{base_url}}/check/echo HTTP/1.1
@@ -11,29 +11,29 @@ GET {{base_url}}/check/echo HTTP/1.1
 POST {{base_url}}{{api_v}}/todos/register HTTP/1.1
 Content-Type: application/json
 
-# [
-#   {
-#     "groupHost": true,
-#     "userUUID": "123e4567-e89b-12d3-a456-426614174000",
-#     "title": "ひまぷら",
-#     "priority": 1
-#   },
-#   {
-#     "groupHost": false,
-#     "userUUID": "123e4567-e89b-12d3-a456-426614174000",
-#     "title": "バグ修正",
-#     "requiredTime": 5400000,
-#     "memo": "UIの不具合を修正する"
-#   }
-# ]
+[
+  {
+    "groupHost": true,
+    "userUUID": "123e4567-e89b-12d3-a456-426614174000",
+    "title": "ひまぷら",
+    "priority": 1
+  },
+  {
+    "groupHost": false,
+    "userUUID": "123e4567-e89b-12d3-a456-426614174000",
+    "title": "バグ修正",
+    "requiredTime": 5400000,
+    "memo": "UIの不具合を修正する"
+  }
+]
 
-[{
-  "userUUID": "eefbacae-28b2-4e32-91be-f6c08573e6b9",
-  "title": "買い出し",
-  "priority": 3,
-  "requiredTime": 600000000000,
-  "memo": "じゃがいも忘れたら人生詰み"
-}]
+# [{
+#   "userUUID": "eefbacae-28b2-4e32-91be-f6c08573e6b9",
+#   "title": "買い出し",
+#   "priority": 3,
+#   "requiredTime": 600000000000,
+#   "memo": "じゃがいも忘れたら人生詰み"
+# }]
 
 ### todo一覧取得(単体と親要素)
 GET {{base_url}}{{api_v}}/todos/todos HTTP/1.1
@@ -44,4 +44,15 @@ GET {{base_url}}{{api_v}}/todos/{{todo_uuid}} HTTP/1.1
 ### todoGroup取得
 GET {{base_url}}{{api_v}}/todos/todo_groups/{{todo_group_uuid}} HTTP/1.1
 
+### todo更新
+PUT {{base_url}}{{api_v}}/todos/update/{{todo_uuid}} HTTP/1.1
+Content-Type: application/json
+
+{
+  "userUUID": "16228a6b-d768-4b30-aeaa-fc455922865c",
+  "title": "わーろた",
+  "priority": 3,
+  "requiredTime": 600000000000,
+  "memo": "人生ゲーム"
+}
 

@@ -7,7 +7,7 @@ import (
 // requestに必要な値
 // TODOテーブル
 type RegisterTodo struct {
-	GroupHost     bool        `json:"groupHost"`     // 親要素かのフラグ
+	GroupHost     bool          `json:"groupHost"`     // 親要素かのフラグ
 	UserUUID      string        `json:"userUUID"`      // ユーザーUUID
 	Titel         string        `json:"title"`         // todoタイトル
 	Priority      int           `json:"priority"`      // 重要度	1:高、2:中、3:低

@@ -82,7 +82,7 @@ func (h *TodoHandler) GetTodoGroupHandler(ctx *gin.Context) {
 		var serviceErr *custom.CustomErr
 		if errors.As(err, &serviceErr) {
 			switch serviceErr.Type {
-			case custom.ErrTypePermissionDenied:	// 見れるグループない
+			case custom.ErrTypePermissionDenied: // 見れるグループない
 				// エラーログ(権限無し)
 				logging.ErrorLog("Do not have the necessary permissions", err)
 				// レスポンス
@@ -138,7 +138,7 @@ func (h *TodoHandler) GetTodoDetailHandler(ctx *gin.Context) {
 		var serviceErr *custom.CustomErr
 		if errors.As(err, &serviceErr) {
 			switch serviceErr.Type {
-			case custom.ErrTypePermissionDenied:	// 見れるグループない
+			case custom.ErrTypePermissionDenied: // 見れるグループない
 				// エラーログ(権限無し)
 				logging.ErrorLog("Do not have the necessary permissions", err)
 				// レスポンス
@@ -173,4 +173,36 @@ func (h *TodoHandler) GetTodoDetailHandler(ctx *gin.Context) {
 
 	// 成功レスポンス
 	responder.SendSuccess(ctx, http.StatusOK, todo)
+}
+
+// todo更新
+func (h *TodoHandler) UpdateTodoHandler(ctx *gin.Context) {
+
+	// 構造体にマッピング
+	var bTodo requests.RegisterTodo // 構造体のインスタンス
+	if err := ctx.ShouldBindJSON(&bTodo); err != nil {
+		fmt.Println("Binding failed:", err)
+		responder.SendFailedBindJSON(ctx, err)
+		return
+	}
+
+	// userid取得
+	// id, _ := ctx.Get("id")
+	// idAdjusted := id.(string) // アサーション
+	// fmt.Println(idAdjusted)   //　アサーションの確認
+
+	// idAdjusted := "16228a6b-d768-4b30-aeaa-fc455922865c"
+	//todo_uuidの取得
+	todoUuid := ctx.Param("todo_uuid")
+
+	fmt.Println(bTodo)
+
+	todoInfo, err := h.s.UpdateTodoService(bTodo, todoUuid)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// 成功レスポンス
+	responder.SendSuccess(ctx, http.StatusOK, todoInfo)
+
 }

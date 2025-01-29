@@ -91,7 +91,7 @@ TODO: ここにエンドポイント仕様書
   
 - **URL:** `/v1/todos/register`
 - **メソッド:** POST
-- **説明:** todoの新規登録
+- **説明:** todoの新規登録　requiredTimeはms
 - **リクエスト:**
   - ヘッダー:
     - `Content-Type`: application/json
@@ -101,7 +101,7 @@ TODO: ここにエンドポイント仕様書
       "userUUID": "eefbacae-28b2-4e32-91be-f6c08573e6b9",
       "title": "買い出し",
       "priority": 3,
-      "requiredTime": 600000000000,
+      "requiredTime": 1800000,
       "memo": "じゃがいも忘れたら人生詰み"
     }]
 
