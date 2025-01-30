@@ -85,7 +85,79 @@ TODO: ディレクトリ構成
 
 ### エンドポインツ
 
-TODO: ここにエンドポイント仕様書
+<details>
+  <summary>カレンダーの情報を取得するエンドポイント</summary>
+
+- **URL:** `/v1/auth/users/calendars`
+- **メソッド:** GET
+- **説明:** ログインしているアカウントのGoogleカレンダーをAPIから取得する
+- **リクエスト:**
+  - ヘッダー:
+    - `Content-Type`: application/json,
+    - `Authorization`: (string) 認証トークン
+  -  - ボディ:
+
+- **レスポンス:**
+  - ステータスコード:200 OK
+    - ボディ:JSON
+      ```json
+      {
+        "srvResMsg":  "OK",
+        "srvResData": {
+          "calendar": [
+            {
+            "date": "日付",
+            "todos"[
+                    "title":";タスクの名前",
+                    "time":"かかる時間",
+                    "place":"場所",
+                    "explanation":"タスクのメモ",
+            ]
+            }
+          ],
+        },
+      }
+      ```
+
+</details>
+
+<details>
+  <summary>カレンダーに予定を追加するエンドポイント</summary>
+
+- **URL:** `/v1/auth/users/calendars`
+- **メソッド:** POST
+- **説明:** ログインしているアカウントのGoogleカレンダーに予定を追加する
+- **リクエスト:**
+  - ヘッダー:
+    - `Content-Type`: application/json
+    - `Authorization`: (string) 認証トークン
+
+  - ボディ:
+    ```
+      {
+          "calendar"[
+            "date":"日付",
+            "todos"[
+                    "title":";タスクの名前",
+                    "time":"かかる時間",
+                    "place":"場所",
+                    "explanation":"タスクのメモ",
+            ]
+          ]
+      }
+      ```
+
+- **レスポンス:**
+  - ステータスコード: 200 OK
+    - ボディ:JSON
+      ```json
+      {
+        "srvResMsg":  "OK",
+        "srvResData": {},
+      }
+      ```
+
+</details>
 
 ### API仕様書てんぷれ
 
