@@ -57,7 +57,7 @@ func routing(engine *gin.Engine, handlers Handlers) {
 			{
 
 				// カレンダー取得
-				users.GET("/calendars")
+				users.GET("/calendars", handlers.CalendarHandler.GetCalender) // /v1/auth/users/calendars
 
 				// カレンダーに予定追加
 				users.POST("/calendars/events")
