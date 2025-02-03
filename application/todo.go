@@ -35,16 +35,14 @@ func (s *TodoService) RegisterTodoService(req []clireq.RegisterTodo) ([]TodoInfo
 
 	// 他のtodo登録で必要なgroupHostの情報を保持する用変数
 	var groupUuid string
-	hostPriority := 0 // TODO:置き換わってるかを判断できるように0入れてるけど、別の方法ありそうだったから変える
+	hostPriority := 0 // TODO:置き換わってるかを判断できるように0入れてるけど、別の方法ありそうだったら変える
 
 	// 結果格納用
 	var todoInfos []TodoInfo
 
-	// 複数登録するときのために
+	// 複数登録するときのために　// TODO:コード書き換えます。きしょいので
 	for _, todo := range req {
-
-		fmt.Println(todo) // 情報確認
-
+		fmt.Printf("todo: %+v\n", todo) // フィールド内容をすべて確認
 		if todo.GroupHost {
 			// uuidを生成
 			hostId, err := uuid.NewRandom() //新しいuuidの作成
@@ -73,7 +71,6 @@ func (s *TodoService) RegisterTodoService(req []clireq.RegisterTodo) ([]TodoInfo
 				TodoUuid: groupUuid,
 				Title:    todo.Titel,
 			}
-			// 情報格納
 			todoInfos = append(todoInfos, todoInfo)
 
 		} else {
@@ -89,17 +86,25 @@ func (s *TodoService) RegisterTodoService(req []clireq.RegisterTodo) ([]TodoInfo
 				hostPriority = todo.Priority
 			}
 
+			// 登録する構造体の宣言
+			bTodo := model.Todo{
+				UserUuid:     todo.UserUUID,
+				TodoUuid:     uuid.String(),
+				Title:        todo.Titel,
+				Priority:     hostPriority,
+				RequiredTime: todo.RequiredTime,
+				Memo:         todo.Memo,
+				Date:         time.Now(),
+			}
+
+			// hostがあった場合、todoGroupUuidが保持されるため単体登録の時、登録されないので
+			// groupUuidに値が入っているときにその項目を増やすようにしました
+			if groupUuid != "" {
+				bTodo.TodoGroupUuid = &groupUuid
+			}
+
 			// 構造体をレコード登録処理に投げる
-			_, err = s.i.CreateTodo(model.Todo{
-				UserUuid:      todo.UserUUID,
-				TodoUuid:      uuid.String(),
-				Title:         todo.Titel,
-				Priority:      hostPriority,
-				RequiredTime:  todo.RequiredTime,
-				Memo:          todo.Memo,
-				Date:          time.Now(),
-				TodoGroupUuid: &groupUuid,
-			})
+			_, err = s.i.CreateTodo(bTodo)
 			if err != nil {
 				return []TodoInfo{}, err
 			}
@@ -109,10 +114,10 @@ func (s *TodoService) RegisterTodoService(req []clireq.RegisterTodo) ([]TodoInfo
 				TodoUuid: uuid.String(),
 				Title:    todo.Titel,
 			}
+
 			// 情報格納
 			todoInfos = append(todoInfos, todoInfo)
 		}
-
 	}
 
 	return todoInfos, nil
@@ -183,11 +188,11 @@ func (s *TodoService) FindAllTodoService(userUuid string) ([]FindAllTodo, error)
 func (s *TodoService) FindTodoGroupService(userUuid string, todoGroupUuid string) ([]model.Todo, error) {
 
 	// todoGroupが存在しているのか判断する
-	isGroup, err := s.i.IsTodoGroup(userUuid, todoGroupUuid)
+	isTodoGroup, err := s.i.IsTodoGroup(userUuid, todoGroupUuid)
 	if err != nil {
 		return []model.Todo{}, err
 	}
-	if !isGroup { // なかったらエラー
+	if !isTodoGroup { // なかったらエラー TODO:グループなかったときのエラーって権限なし？
 		logging.ErrorLog("Do not have the necessary permissions", nil)
 		return nil, custom.NewErr(custom.ErrTypePermissionDenied)
 	}
@@ -206,4 +211,64 @@ func (s *TodoService) FindTodoGroupService(userUuid string, todoGroupUuid string
 	})
 
 	return todoGroup, err
+}
+
+// todo詳細取得
+func (s *TodoService) GetTodoDetailaService(userUuid string, todoUuid string) (model.Todo, error) {
+
+	// todo取得
+	todoDetail, err := s.i.GetTodoDetail(userUuid, todoUuid)
+	if err != nil {
+		return model.Todo{}, err
+	}
+
+	// 取得できてるか確認　なかったらエラー
+	if todoDetail == nil { // 取得できなかった
+		fmt.Println("todoDetail is nil")
+		return model.Todo{}, custom.NewErr(custom.ErrTypeNoResourceExist)
+	}
+
+	fmt.Println(todoDetail)
+
+	return *todoDetail, err
+}
+
+// todo更新
+func (s *TodoService) UpdateTodoService(req clireq.RegisterTodo, todoUuid string) (TodoInfo, error) {
+
+	// todoが存在するか reqの中にあるuserUuidを使う
+	todoDetail, err := s.i.GetTodoDetail(req.UserUUID, todoUuid)
+	if err != nil {
+		return TodoInfo{}, err
+	}
+
+	// 取得できてるか確認　なかったらエラー
+	if todoDetail == nil { // 取得できなかった
+		fmt.Println("todoDetail is nil")
+		return TodoInfo{}, custom.NewErr(custom.ErrTypeNoResourceExist)
+	}
+
+	// 更新の際に使用
+	bTodo := model.Todo{
+		UserUuid:     req.UserUUID,
+		TodoUuid:     todoUuid,
+		Title:        req.Titel,
+		Priority:     req.Priority,
+		RequiredTime: req.RequiredTime,
+		Memo:         req.Memo,
+		Date:         time.Now(),
+	}
+
+	_, err = s.i.UpdateTodo(req.UserUUID, todoDetail.TodoUuid, bTodo)
+	if err != nil {
+		return TodoInfo{}, err
+	}
+
+	// 情報格納
+	todoInfo := TodoInfo{
+		TodoUuid: todoUuid,
+		Title:    bTodo.Title,
+	}
+
+	return todoInfo, nil
 }

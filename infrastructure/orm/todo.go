@@ -85,3 +85,30 @@ func (i *TodoInfrastruture) GetTodoByTodoGroup(userUuid string, todoGroupUuid st
 
 	return todos, nil
 }
+
+// todo詳細取得
+func (i *TodoInfrastruture) GetTodoDetail(userUuid string, todoUuid string) (*model.Todo, error) {
+	// 格納用変数
+	var todoDateil model.Todo
+
+	// 詳細取得
+	found, err := i.db.Where("user_uuid	= ?", userUuid).And("todo_uuid=?", todoUuid).Get(&todoDateil)
+	if err != nil {
+		return nil, err
+	}
+
+	// データが取得できなかったら
+	if !found {
+		return nil, nil
+	}
+
+	return &todoDateil, nil
+}
+
+// todo更新
+func (i *TodoInfrastruture) UpdateTodo(userUuid string, todoUuid string, record model.Todo) (int64, error) {
+	affected, err := i.db.
+			Where("user_uuid = ? AND todo_uuid = ?", userUuid, todoUuid).
+			Update(&record)
+	return affected, err
+}

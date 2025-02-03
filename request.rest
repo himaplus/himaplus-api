@@ -17,6 +17,7 @@
 @clientSecret = {{$dotenv CLIENT_SECRET}}
 // 変数
 @todo_group_uuid = 7ec51405-03f4-47f6-a69e-8e52395d796b
+@todo_uuid =  db2d30de-127e-47cf-aa26-772398e004f4 
 
 // Requests 
 
@@ -42,7 +43,7 @@ Content-Type: application/json
 
 [{
   "userUUID": "eefbacae-28b2-4e32-91be-f6c08573e6b9",
-  "Titel": "買い出し",
+  "title": "買い出し3",
   "priority": 3,
   "requiredTime": 600000000000,
   "memo": "じゃがいも忘れたら人生詰み"

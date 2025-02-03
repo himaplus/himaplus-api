@@ -86,6 +86,155 @@ TODO: ディレクトリ構成
 ### エンドポインツ
 
 <details>
+  <summary>todo新規登録するエンドポイント</summary>
+  
+- **URL:** `/v1/todos/register`
+- **メソッド:** POST
+- **説明:** todoの新規登録　requiredTimeはms
+- **リクエスト:**
+  - ヘッダー:
+    - `Content-Type`: application/json
+    <!-- - `Authorization`: (string) 認証トークン -->
+  - ボディ:
+    [{
+      "userUUID": "eefbacae-28b2-4e32-91be-f6c08573e6b9",
+      "title": "買い出し",
+      "priority": 3,
+      "requiredTime": 1800000,
+      "memo": "じゃがいも忘れたら人生詰み"
+    }]
+
+- **レスポンス:**
+  - ステータスコード: 201 Create
+    - ボディ:
+
+      ```json
+        {
+          "srvResData": [
+            {
+              "todoUUID": "ca40ef45-3158-4579-97c3-0477cf063bc0",
+              "title": "買い出し"
+            }
+          ],
+          "srvResMsg": "Created"
+        }      
+      ```
+</details>
+
+<details>
+  <summary>todo一覧取得するエンドポイント</summary>
+
+- **URL:** `/v1/todos/todos`
+- **メソッド:** GET
+- **説明:** 登録されている細分化されていないtodoと細分化のホストを一覧取得してくる
+- **リクエスト:**
+  - ヘッダー:
+    <!-- - `Authorization`: (string) 認証トークン -->
+  - ボディ:
+    ＊さまざまな形式のボディ値＊
+
+- **レスポンス:**
+  - ステータスコード: 200 OK
+    - ボディ:
+
+      ```json
+      {
+        "srvResData": [
+          {
+            "todoUUID": "7ec51405-03f4-47f6-a69e-8e52395d796b",
+            "title": "どっかー勉強",
+            "priority": 1,
+            "groupHost": true
+          },
+          {
+            "todoUUID": "db2d30de-127e-47cf-aa26-772398e004f4",
+            "title": "買い物",
+            "priority": 3,
+            "groupHost": false
+          }
+        ],
+        "srvResMsg": "OK"
+      }
+      ```
+</details>
+
+<details>
+  <summary>todo詳細取得するエンドポイント</summary>
+
+- **URL:** `/v1/todos/{todo_uuid}`
+- **メソッド:** GET
+- **説明:** todo詳細取得
+- **リクエスト:**
+  - ヘッダー:
+    <!-- - `Authorization`: (string) 認証トークン -->
+  - ボディ:
+
+- **レスポンス:**
+  - ステータスコード: 200 OK
+    - ボディ:
+
+      ```json
+      {
+        "srvResData": {
+          "userUUID": "16228a6b-d768-4b30-aeaa-fc455922865c",
+          "todoUUID": "97c2e621-4067-480b-90ed-2ad69af04b8b",
+          "title": "資料作成",
+          "priority": 2,
+          "requiredTime": 3600000,
+          "memo": "地球祭資料の作成",
+          "date": "2024-12-13T12:31:33+09:00",
+          "todoGroupUuid": null
+        },
+        "srvResMsg": "OK"
+      }      
+      ```
+
+</details>
+
+<details>
+  <summary>todoGroup取得するエンドポイント</summary>
+
+- **URL:** `/v1/todos/todo_groups/{todo_group_uuid}`
+- **メソッド:** GET
+- **説明:** GroupUuidが同一のtodoを取得する
+- **リクエスト:**
+  - ヘッダー:
+    <!-- - `Authorization`: (string) 認証トークン -->
+  - ボディ:
+
+- **レスポンス:**
+  - ステータスコード: 200 ok
+    - ボディ:
+
+      ```json
+      {
+        "srvResData": [
+          {
+            "userUUID": "16228a6b-d768-4b30-aeaa-fc455922865c",
+            "todoUUID": "22ce9db6-2355-4262-aa88-3df99bacfcf3",
+            "title": "教材買いに行く",
+            "priority": 1,
+            "requiredTime": 3600000,
+            "memo": "",
+            "date": "2024-12-14T12:31:33+09:00",
+            "todoGroupUuid": "7ec51405-03f4-47f6-a69e-8e52395d796b"
+          },
+          {
+            "userUUID": "16228a6b-d768-4b30-aeaa-fc455922865c",
+            "todoUUID": "c22539b4-edbc-48bc-8ef6-f5fc8f251e98",
+            "title": "サンプルコード書いてみる",
+            "priority": 1,
+            "requiredTime": 3600000,
+            "memo": "",
+            "date": "2024-12-14T12:31:33+09:00",
+            "todoGroupUuid": "7ec51405-03f4-47f6-a69e-8e52395d796b"
+          }
+        ],
+        "srvResMsg": "OK"
+        }
+      ```
+
+<details>
   <summary>カレンダーの情報を取得するエンドポイント</summary>
 
 - **URL:** `/v1/auth/users/calendars`
