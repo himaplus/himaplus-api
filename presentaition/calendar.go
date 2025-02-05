@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"himaplus-api/application"
 	"himaplus-api/common/responder"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
@@ -66,12 +68,36 @@ func (h *CalendarHandler) GetCalender(ctx *gin.Context) {
 
 	// カレンダーAPIを使う
 
-	// events
-	events, err := srv.Events.List("primary").Do()
+	// // events
+	// events, err := srv.Events.List("primary").Do()
+	// if err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{
+	// 		"message": "Failed to retrieve event.",
+	// 	})
+	// }
+
+	// ctx.JSON(200, gin.H{
+	// 	"message":   "Successfully retrieved events.",
+	// 	"calendars": events.Items, // 認証失敗で取れてないとここでにるぽる
+	// })
+
+	t := time.Now().Format(time.RFC3339)
+	events, err := srv.Events.List("primary").ShowDeleted(false).
+		SingleEvents(true).TimeMin(t).MaxResults(10).OrderBy("startTime").Do()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to retrieve event.",
-		})
+		log.Fatalf("Unable to retrieve next ten of the user's events: %v", err)
+	}
+	fmt.Println("Upcoming events:")
+	if len(events.Items) == 0 {
+		fmt.Println("No upcoming events found.")
+	} else {
+		for _, item := range events.Items {
+			date := item.Start.DateTime
+			if date == "" {
+				date = item.Start.Date
+			}
+			fmt.Printf("%v (%v)\n", item.Summary, date)
+		}
 	}
 
 	ctx.JSON(200, gin.H{
