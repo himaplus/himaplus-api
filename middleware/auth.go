@@ -34,9 +34,10 @@ func AuthToken() gin.HandlerFunc {
 		}
 
 		// コンテキストに設定
-		ctx.Set("token", headerAuthorization) // クライアントのトークン
-		ctx.Set("id", userInfo.Id)            // クライアントのID
-		ctx.Set("user", userInfo)             // クライアントの全情報
+		ctx.Set("token", headerAuthorization)        // クライアントのトークン
+		ctx.Set("id", userInfo.Id)                   // クライアントのID
+		ctx.Set("accessToken", userInfo.AccessToken) // クライアントのアクセストークン
+		ctx.Set("user", userInfo)                    // クライアントの全情報
 
 		ctx.Next() // エンドポイントの処理に以降
 	}

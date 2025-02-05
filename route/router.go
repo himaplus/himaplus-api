@@ -37,7 +37,7 @@ func routing(engine *gin.Engine, handlers Handlers) {
 	v1 := engine.Group("/v1")
 	{
 		// todo新規登録 TODO: /v1/todosグループから/v1/auth/todosグループに移行して下行のコメントも外す
-		// v1.POST("/register", handlers.TodoHandler.RegisterTodoHandler) //  v1/todos/register
+		// v1.POST("/register", handlers.TodoHandler.RegisterTodoHandler) //  /v1/todos/register
 
 		// authグループ
 		auth := v1.Group("/auth", middleware.AuthToken())
