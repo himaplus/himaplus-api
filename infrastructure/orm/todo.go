@@ -112,3 +112,9 @@ func (i *TodoInfrastruture) UpdateTodo(userUuid string, todoUuid string, record 
 			Update(&record)
 	return affected, err
 }
+
+// todo削除
+func (i *TodoInfrastruture) DeleteTodo(userUuid string, todoUuid string) (int64, error) {
+	affected, err := i.db.Where("user_uuid = ? AND todo_uuid = ?", userUuid, todoUuid).Delete()
+	return affected, err
+}

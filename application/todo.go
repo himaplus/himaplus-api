@@ -234,41 +234,109 @@ func (s *TodoService) GetTodoDetailaService(userUuid string, todoUuid string) (m
 }
 
 // todo更新
-func (s *TodoService) UpdateTodoService(req clireq.RegisterTodo, todoUuid string) (TodoInfo, error) {
+func (s *TodoService) UpdateTodoService(req []clireq.RegisterTodo, todoUuid string) ([]TodoInfo, error) {
 
 	// todoが存在するか reqの中にあるuserUuidを使う
-	todoDetail, err := s.i.GetTodoDetail(req.UserUUID, todoUuid)
+	todoDetail, err := s.i.GetTodoDetail(req[0].UserUUID, todoUuid)
 	if err != nil {
-		return TodoInfo{}, err
+		return []TodoInfo{}, err
 	}
 
 	// 取得できてるか確認　なかったらエラー
 	if todoDetail == nil { // 取得できなかった
 		fmt.Println("todoDetail is nil")
-		return TodoInfo{}, custom.NewErr(custom.ErrTypeNoResourceExist)
+		return []TodoInfo{}, custom.NewErr(custom.ErrTypeNoResourceExist)
 	}
 
-	// 更新の際に使用
-	bTodo := model.Todo{
-		UserUuid:     req.UserUUID,
-		TodoUuid:     todoUuid,
-		Title:        req.Titel,
-		Priority:     req.Priority,
-		RequiredTime: req.RequiredTime,
-		Memo:         req.Memo,
-		Date:         time.Now(),
+	// 他のtodo登録で必要なgroupHostの情報を保持する用変数
+	var groupUuid string
+	hostPriority := 0
+
+	// 結果格納用
+	var todoInfos []TodoInfo
+
+	// 複数登録するときのために　// TODO:コード書き換えます。きしょいので
+	for _, todo := range req {
+
+		// 更新の時、単体がhostになったときの処理
+		if todo.GroupHost {
+			// hostUuid、Priorityの保持
+			groupUuid = todoDetail.TodoUuid
+			hostPriority = todo.Priority
+
+			// 構造体をレコード登録処理に投げる　todoGroupの登録処理
+			_, err = s.i.CreateTodoGroup(model.TodoGroup{
+				UserUuid:      todo.UserUUID,
+				TodoGroupUuid: groupUuid,
+				Title:         todo.Titel,
+				Priority:      todo.Priority,
+				Date:          time.Now(),
+			})
+			if err != nil {
+				return []TodoInfo{}, err
+			}
+
+			// いらなくなった単体todoを削除
+			_, err = s.i.DeleteTodo(todo.UserUUID, todoDetail.TodoUuid)
+			if err != nil {
+				return []TodoInfo{}, err
+			}
+
+			// 情報格納
+			todoInfo := TodoInfo{
+				TodoUuid: groupUuid,
+				Title:    todo.Titel,
+			}
+			todoInfos = append(todoInfos, todoInfo)
+
+		} else {
+
+			// 登録する構造体の宣言	// 	todoUuidとtodoGroupUuidは除く
+			bTodo := model.Todo{
+				UserUuid:     todo.UserUUID,
+				Title:        todo.Titel,
+				Priority:     hostPriority,
+				RequiredTime: todo.RequiredTime,
+				Memo:         todo.Memo,
+				Date:         time.Now(),
+			}
+
+			// 単体todoの更新
+			if groupUuid == "" {
+				// todoUuidを入れる
+				bTodo.TodoUuid = todoUuid
+				bTodo.Priority = todo.Priority
+
+				// 更新処理
+				_, err = s.i.UpdateTodo(todo.UserUUID, todoDetail.TodoUuid, bTodo)
+				if err != nil {
+					return []TodoInfo{}, err
+				}
+			} else { // その他、細分化されたtodoの登録
+
+				uuid, err := uuid.NewRandom() //新しいuuidの作成
+				if err != nil {
+					return []TodoInfo{}, err
+				}
+
+				bTodo.TodoUuid = uuid.String()
+
+				// 登録処理
+				_, err = s.i.CreateTodo(bTodo)
+				if err != nil {
+					return []TodoInfo{}, err
+				}
+			}
+
+			// 情報格納
+			todoInfo := TodoInfo{
+				TodoUuid: groupUuid,
+				Title:    todo.Titel,
+			}
+			todoInfos = append(todoInfos, todoInfo)
+		}
+
 	}
 
-	_, err = s.i.UpdateTodo(req.UserUUID, todoDetail.TodoUuid, bTodo)
-	if err != nil {
-		return TodoInfo{}, err
-	}
-
-	// 情報格納
-	todoInfo := TodoInfo{
-		TodoUuid: todoUuid,
-		Title:    bTodo.Title,
-	}
-
-	return todoInfo, nil
+	return todoInfos, nil
 }
