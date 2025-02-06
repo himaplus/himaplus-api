@@ -46,6 +46,7 @@ func (h *TodoHandler) RegisterTodoHandler(ctx *gin.Context) {
 
 // todo取得
 func (h *TodoHandler) GetAllTodoHandler(ctx *gin.Context) {
+	logging.SimpleLog("here is GetAllTodoHandler")
 
 	// userid取得
 	// id, _ := ctx.Get("id")
