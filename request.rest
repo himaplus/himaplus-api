@@ -81,3 +81,12 @@ Content-Type: application/json
   "requiredTime": 600000000000,
   "memo": ""
 }]
+
+
+// カレンダー関連
+
+// カレンダー取得
+GET {{baseUrl}}/v1/auth/users/calendars HTTP/1.1
+Authorization: {{jwt}}
+
+###
