@@ -53,6 +53,13 @@ func routing(engine *gin.Engine, handlers Handlers) {
 
 				// todoGroup取得 TODO:
 				todos.GET("/todo_groups/:todo_group_uuid", handlers.TodoHandler.GetTodoGroupHandler) // v1/todos/todo_groups/{todo_group_uuid}
+
+				// todo詳細取得
+				todos.GET("/:todo_uuid", handlers.TodoHandler.GetTodoDetailHandler) // v1/auth/todos/{todo_uuid}
+
+				// // todo更新
+				// todos.PUT("/update/:todo_uuid", handlers.TodoHandler.UpdateTodoHandler) // v1/auth/todos/update/{todo_uuid}
+
 			}
 
 			// usersグループ
@@ -74,14 +81,6 @@ func routing(engine *gin.Engine, handlers Handlers) {
 
 		}
 
-				// todo詳細取得
-				todos.GET("/:todo_uuid", handlers.TodoHandler.GetTodoDetailHandler) // v1/auth/todos/{todo_uuid}
-
-				// // todo更新
-				// todos.PUT("/update/:todo_uuid", handlers.TodoHandler.UpdateTodoHandler) // v1/auth/todos/update/{todo_uuid}
-
-			}
-		}
 	}
 }
 
