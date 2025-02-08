@@ -52,7 +52,27 @@ func routing(engine *gin.Engine, handlers Handlers) {
 				todos.GET("/todos", handlers.TodoHandler.GetAllTodoHandler) // v1/auth/todos
 
 				// todoGroup取得 TODO:
-				todos.GET("/todo_groups/:todo_group_uuid", handlers.TodoHandler.GetTodoGroupHandler) // v1/auth/todos/todo_groups/{todo_group_uuid}
+				todos.GET("/todo_groups/:todo_group_uuid", handlers.TodoHandler.GetTodoGroupHandler) // v1/todos/todo_groups/{todo_group_uuid}
+			}
+
+			// usersグループ
+			users := auth.Group("/users")
+			{
+
+				// カレンダー取得
+				users.GET("/calendars", handlers.CalendarHandler.GetCalender) // /v1/auth/users/calendars
+
+				// カレンダーに予定追加
+				users.POST("/calendars/events")
+
+				// // calendarsグループ // TODO: あとで追加
+				// calendars := users.Group("calendars")
+				// {
+
+				// }
+			}
+
+		}
 
 				// todo詳細取得
 				todos.GET("/:todo_uuid", handlers.TodoHandler.GetTodoDetailHandler) // v1/auth/todos/{todo_uuid}

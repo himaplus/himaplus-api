@@ -2,13 +2,13 @@
 package route
 
 import (
-	// "juninry-api/domain"
-	// infrastructure_old "himaplus-api/infrastructure"
 	"himaplus-api/application"
 	"himaplus-api/common/logging"
-	infrastructure "himaplus-api/infrastructure/orm"
-	orm "himaplus-api/infrastructure/orm/init"
+	apicli "himaplus-api/infrastructure/extapi"
+	"himaplus-api/infrastructure/orm"
+	ornminit "himaplus-api/infrastructure/orm/init"
 	presentation "himaplus-api/presentaition"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
@@ -23,10 +23,15 @@ import (
 // 依存関係を登録したいファクトリー関数を追加していく
 func providers() []interface{} {
 	return []interface{}{
-		// Todoドメイン？
-		infrastructure.NewTodoInfrastruture,
+		// Todo
+		orm.NewTodoInfrastruture,
 		application.NewTodoService,
 		presentation.NewTodoHandler,
+
+		// カレンダー
+		apicli.NewCalendarApiCli,
+		application.NewCalendarService,
+		presentation.NewCalendarHandler,
 	}
 }
 
@@ -36,7 +41,8 @@ type Handlers struct {
 	dig.In // 継承
 
 	// ハンドラーの構造体
-	TodoHandler *presentation.TodoHandler // Todo
+	TodoHandler     *presentation.TodoHandler     // Todo
+	CalendarHandler *presentation.CalendarHandler // Calendar
 }
 
 // 依存関係を作成
@@ -44,15 +50,20 @@ func BuildContainer() *dig.Container {
 	// コンテナを作成
 	container := dig.New()
 
-	// DBの初期化をコンテナに渡し、依存関係を登録
-	container.Provide(
+	// インフラ層が依存する最終的な依存先を解決するためのコンポーネントをdigに登録
+	container.Provide( // DBの初期化をコンテナに渡し、依存関係を登録
 		func() *xorm.Engine {
-			db, err := orm.InitDB() // router設定されたengineを無名関数でラップしたものを受け取り、ルーティングを登録
+			db, err := ornminit.InitDB() // router設定されたengineを無名関数でラップしたものを受け取り、ルーティングを登録
 			if err != nil {
 				logging.ErrorLog("Couldnt receive router engine.", err) // エラー内容を出力し早期リターン
 				panic(err)
 			}
 			return db
+		},
+	)
+	container.Provide( // API処理用のnet/http
+		func() *http.Client {
+			return &http.Client{}
 		},
 	)
 
