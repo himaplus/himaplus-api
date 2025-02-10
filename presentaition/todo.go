@@ -29,9 +29,24 @@ func (h *TodoHandler) RegisterTodoHandler(ctx *gin.Context) {
 	// 構造体にマッピング
 	var bTodo []clireq.RegisterTodo // 構造体のインスタンス
 	if err := ctx.ShouldBindJSON(&bTodo); err != nil {
-		fmt.Println("Binding failed:", err)
-		responder.SendFailedBindJSON(ctx, err)
+		// エラーログ
+		logging.ErrorLog("Failure to bind request.", err)
+		// レスポンス
+		resStatusCode := http.StatusBadRequest
+		ctx.JSON(resStatusCode, gin.H{
+			"srvResMsg":  http.StatusText(resStatusCode),
+			"srvResData": gin.H{},
+		})
 		return
+	}
+
+	id, _ := ctx.Get("id")
+	idAdjusted := id.(string) // アサーション
+	fmt.Println(idAdjusted)   //　アサーションの確認
+
+	// 構造体にidを設定
+	for i := range bTodo {
+		bTodo[i].UserUUID = idAdjusted
 	}
 
 	// サービス処理
@@ -49,10 +64,9 @@ func (h *TodoHandler) GetAllTodoHandler(ctx *gin.Context) {
 	logging.SimpleLog("here is GetAllTodoHandler")
 
 	// userid取得
-	// id, _ := ctx.Get("id")
-	// idAdjusted := id.(string) // アサーション
-	// fmt.Println(idAdjusted)   //　アサーションの確認
-	idAdjusted := "16228a6b-d768-4b30-aeaa-fc455922865c"
+	id, _ := ctx.Get("id")
+	idAdjusted := id.(string)            // アサーション
+	fmt.Println("userUuid:", idAdjusted) //　アサーションの確認
 
 	// サービス処理
 	todos, err := h.s.FindAllTodoService(idAdjusted)
@@ -67,11 +81,10 @@ func (h *TodoHandler) GetAllTodoHandler(ctx *gin.Context) {
 // todoGroup取得
 func (h *TodoHandler) GetTodoGroupHandler(ctx *gin.Context) {
 	// userid取得
-	// id, _ := ctx.Get("id")
-	// idAdjusted := id.(string) // アサーション
-	// fmt.Println(idAdjusted)   //　アサーションの確認
+	id, _ := ctx.Get("id")
+	idAdjusted := id.(string) // アサーション
+	fmt.Println(idAdjusted)   //　アサーションの確認
 
-	idAdjusted := "16228a6b-d768-4b30-aeaa-fc455922865c"
 	//todo_group_uuidの取得
 	todoGroupUuid := ctx.Param("todo_group_uuid")
 
@@ -123,11 +136,10 @@ func (h *TodoHandler) GetTodoGroupHandler(ctx *gin.Context) {
 // todo詳細取得
 func (h *TodoHandler) GetTodoDetailHandler(ctx *gin.Context) {
 	// userid取得
-	// id, _ := ctx.Get("id")
-	// idAdjusted := id.(string) // アサーション
-	// fmt.Println(idAdjusted)   //　アサーションの確認
+	id, _ := ctx.Get("id")
+	idAdjusted := id.(string) // アサーション
+	fmt.Println(idAdjusted)   //　アサーションの確認
 
-	idAdjusted := "16228a6b-d768-4b30-aeaa-fc455922865c"
 	//todo_uuidの取得
 	todoUuid := ctx.Param("todo_uuid")
 
@@ -180,7 +192,7 @@ func (h *TodoHandler) GetTodoDetailHandler(ctx *gin.Context) {
 func (h *TodoHandler) UpdateTodoHandler(ctx *gin.Context) {
 
 	// 構造体にマッピング
-	var bTodo clireq.RegisterTodo // 構造体のインスタンス
+	var bTodo []clireq.RegisterTodo // 構造体のインスタンス
 	if err := ctx.ShouldBindJSON(&bTodo); err != nil {
 		fmt.Println("Binding failed:", err)
 		responder.SendFailedBindJSON(ctx, err)
@@ -188,11 +200,15 @@ func (h *TodoHandler) UpdateTodoHandler(ctx *gin.Context) {
 	}
 
 	// userid取得
-	// id, _ := ctx.Get("id")
-	// idAdjusted := id.(string) // アサーション
-	// fmt.Println(idAdjusted)   //　アサーションの確認
+	id, _ := ctx.Get("id")
+	idAdjusted := id.(string) // アサーション
+	fmt.Println(idAdjusted)   //　アサーションの確認
 
-	// idAdjusted := "16228a6b-d768-4b30-aeaa-fc455922865c"
+	// 構造体にidを設定
+	for i := range bTodo {
+		bTodo[i].UserUUID = idAdjusted
+	}
+	
 	//todo_uuidの取得
 	todoUuid := ctx.Param("todo_uuid")
 
@@ -200,7 +216,41 @@ func (h *TodoHandler) UpdateTodoHandler(ctx *gin.Context) {
 
 	todoInfo, err := h.s.UpdateTodoService(bTodo, todoUuid)
 	if err != nil {
-		fmt.Println(err)
+		// 処理で発生したエラーのうちカスタムエラーのみ
+		var serviceErr *custom.CustomErr
+		if errors.As(err, &serviceErr) {
+			switch serviceErr.Type {
+			case custom.ErrTypeNoResourceExist:
+				// エラーログ
+				logging.ErrorLog("todo find error", err)
+				// レスポンス
+				resStatusCode := http.StatusNotFound
+				ctx.JSON(resStatusCode, gin.H{
+					"srvResMsg":  http.StatusText(resStatusCode),
+					"srvResData": gin.H{},
+				})
+				return
+
+			default:
+				// エラーログ
+				logging.ErrorLog("aiueos", err)
+				// レスポンス
+				resStatusCode := http.StatusBadRequest
+				ctx.JSON(resStatusCode, gin.H{
+					"srvResMsg":  http.StatusText(resStatusCode),
+					"srvResData": gin.H{},
+				})
+			}
+		}
+		// エラーログ
+		logging.ErrorLog("todo find error", err)
+		// レスポンス(StatusInternalServerError サーバーエラー500番)
+		resStatusCode := http.StatusInternalServerError
+		ctx.JSON(resStatusCode, gin.H{
+			"srvResMsg":  http.StatusText(resStatusCode),
+			"srvResData": gin.H{},
+		})
+		return //　<-返すよって型指定してないから切り上げるだけ
 	}
 
 	// 成功レスポンス
